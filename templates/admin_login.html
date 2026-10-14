@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Acesso Restrito</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Lato', sans-serif;
+            background: linear-gradient(135deg, #0f1e3d 0%, #1a3a6b 50%, #0f2550 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: linear-gradient(160deg, #fdfaf4, #f5f0e8);
+            border-radius: 20px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            border: 1px solid rgba(168,185,216,0.3);
+            animation: cardIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes cardIn {
+            from { transform: scale(0.85) translateY(30px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .login-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .login-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 42px;
+            color: #1a3a6b;
+            margin-bottom: 4px;
+        }
+        .login-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 14px;
+            color: #6a7fa8;
+            margin-bottom: 32px;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #1a3a6b;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            border: 1.5px solid rgba(168,185,216,0.5);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #2c2c2c;
+            background: rgba(255,255,255,0.7);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: #2d5fa6;
+            box-shadow: 0 0 0 3px rgba(45,95,166,0.12);
+        }
+        .error-msg {
+            background: rgba(220,50,50,0.1);
+            border: 1px solid rgba(220,50,50,0.3);
+            color: #c0392b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #2a4e99, #1a3d8f);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 50px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(26,58,107,0.35);
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(26,58,107,0.45);
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #6a7fa8;
+            text-decoration: none;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #2a4e99; }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h1 class="login-title">Admin</h1>
+    <p class="login-sub">Área restrita · Painel do Evento</p>
+
+    {% if error %}
+    <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        <div class="form-group">
+            <label for="password">Senha de Acesso</label>
+            <input type="password" id="password" name="password" placeholder="Digite a senha..." autofocus required>
+        </div>
+        <button type="submit" class="btn-login">🔓 Entrar</button>
+    </form>
+    <a href="/" class="back-link">← Voltar ao convite</a>
+</div>
+</body>
+</html>

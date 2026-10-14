@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+vendor/
+
+confirmacoes.db
+*.db
+
+serve-local.mjs

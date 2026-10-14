@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin — Confirmações de Presença</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Great+Vibes&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background: linear-gradient(135deg, #0c1829 0%, #1a3a6b 60%, #0f2040 100%);
+            min-height: 100vh;
+            color: #e8edf5;
+        }
+
+        /* ── HEADER ── */
+        .admin-header {
+            background: rgba(10, 20, 50, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(168,185,216,0.15);
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-brand-icon { font-size: 28px; }
+        .header-brand-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 28px;
+            color: #c8d8ff;
+        }
+        .header-brand-sub {
+            font-size: 11px;
+            color: rgba(200,216,255,0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: block;
+            margin-top: -4px;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-vol {
+            background: rgba(168,185,216,0.1);
+            border: 1px solid rgba(168,185,216,0.25);
+            color: #a8b9d8;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Lato', sans-serif;
+        }
+        .btn-vol:hover { background: rgba(168,185,216,0.2); color: #c8d8ff; }
+        .btn-logout {
+            background: rgba(220,50,50,0.15);
+            border: 1px solid rgba(220,50,50,0.3);
+            color: #ff9090;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover { background: rgba(220,50,50,0.25); }
+
+        /* ── CONTAINER ── */
+        .admin-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 36px 24px;
+        }
+
+        /* ── CARDS TOPO ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(168,185,216,0.15);
+            border-radius: 16px;
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            backdrop-filter: blur(8px);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: rgba(168,185,216,0.35); }
+        .stat-icon { font-size: 36px; }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #c8d8ff;
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: rgba(168,185,216,0.6);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 4px;
+        }
+
+        /* ── TABELA ── */
+        .table-section {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(168,185,216,0.12);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+        .table-header {
+            padding: 22px 28px;
+            border-bottom: 1px solid rgba(168,185,216,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+        .table-header h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: #c8d8ff;
+        }
+        .search-input {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(168,185,216,0.2);
+            border-radius: 50px;
+            padding: 9px 18px;
+            color: #e8edf5;
+            font-size: 13px;
+            outline: none;
+            width: 220px;
+            transition: all 0.2s;
+        }
+        .search-input::placeholder { color: rgba(168,185,216,0.4); }
+        .search-input:focus { border-color: rgba(100,150,230,0.5); width: 260px; }
+
+        .table-wrap { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead th {
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(168,185,216,0.6);
+            font-weight: 400;
+            border-bottom: 1px solid rgba(168,185,216,0.1);
+            background: rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid rgba(168,185,216,0.07);
+            transition: background 0.2s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(168,185,216,0.06); }
+        tbody td {
+            padding: 14px 20px;
+            font-size: 14px;
+            color: #d0daf0;
+            vertical-align: top;
+        }
+
+        .td-nome {
+            font-weight: 700;
+            color: #e8edf5;
+        }
+        .td-badge {
+            display: inline-block;
+            background: rgba(42,78,153,0.3);
+            border: 1px solid rgba(100,150,230,0.3);
+            color: #a8c0ff;
+            padding: 3px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .td-msg {
+            font-size: 12px;
+            color: rgba(168,185,216,0.6);
+            font-style: italic;
+            max-width: 180px;
+        }
+        .td-data {
+            font-size: 12px;
+            color: rgba(168,185,216,0.5);
+            white-space: nowrap;
+        }
+
+        /* Botão excluir */
+        .btn-excluir {
+            background: rgba(220,50,50,0.1);
+            border: 1px solid rgba(220,50,50,0.25);
+            color: #ff9090;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-excluir:hover { background: rgba(220,50,50,0.25); }
+
+        /* Empty state */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: rgba(168,185,216,0.4);
+        }
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 14px; }
+        .empty-state p { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic; }
+
+        /* Filtro esconder linhas */
+        .row-hidden { display: none; }
+
+        /* Exportar */
+        .btn-export {
+            background: rgba(40,167,69,0.15);
+            border: 1px solid rgba(40,167,69,0.3);
+            color: #5ddc8a;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-export:hover { background: rgba(40,167,69,0.25); }
+
+        @media (max-width: 600px) {
+            .admin-header { padding: 14px 16px; }
+            .header-brand-title { font-size: 22px; }
+            .admin-container { padding: 20px 14px; }
+            .search-input { width: 160px; }
+            .search-input:focus { width: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="admin-header">
+    <div class="header-brand">
+        <span class="header-brand-icon">🌸</span>
+        <div>
+            <span class="header-brand-title">Painel Admin</span>
+            <span class="header-brand-sub">Confirmações de Presença</span>
+        </div>
+    </div>
+    <div class="header-actions">
+        <a href="/" class="btn-vol">← Convite</a>
+        <button class="btn-export" onclick="exportarCSV()">📥 Exportar CSV</button>
+        <a href="/admin/logout" class="btn-logout">Sair 🚪</a>
+    </div>
+</header>
+
+<div class="admin-container">
+
+    <!-- ESTATÍSTICAS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-icon">✅</span>
+            <div>
+                <div class="stat-value">{{ total_confirmacoes }}</div>
+                <div class="stat-label">Confirmações</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">👥</span>
+            <div>
+                <div class="stat-value">{{ total_pessoas }}</div>
+                <div class="stat-label">Total de Pessoas</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">🎉</span>
+            <div>
+                <div class="stat-value" style="font-size:18px;">Esther 18</div>
+                <div class="stat-label">Evento</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABELA DE CONFIRMAÇÕES -->
+    <div class="table-section">
+        <div class="table-header">
+            <h2>Lista de Convidados</h2>
+            <input type="text" id="search-input" class="search-input" placeholder="🔍 Buscar por nome..." oninput="filtrarTabela(this.value)">
+        </div>
+
+        {% if confirmacoes %}
+        <div class="table-wrap">
+            <table id="tabela-confirmacoes">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Pessoas</th>
+                        <th>Mensagem</th>
+                        <th>Data / Hora</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in confirmacoes %}
+                    <tr id="row-{{ c.id }}" data-nome="{{ c.nome | lower }}">
+                        <td style="color: rgba(168,185,216,0.4); font-size: 12px;">{{ loop.index }}</td>
+                        <td class="td-nome">{{ c.nome }}</td>
+                        <td>{{ c.telefone or '—' }}</td>
+                        <td><span class="td-badge">{{ c.numero_pessoas }}</span></td>
+                        <td class="td-msg">{{ c.mensagem or '—' }}</td>
+                        <td class="td-data">{{ c.data_confirmacao[:16].replace('T', ' ') if 'T' in c.data_confirmacao else c.data_confirmacao[:16] }}</td>
+                        <td>
+                            <form method="POST" action="/admin/excluir/{{ c.id }}" onsubmit="return confirm('Remover {{ c.nome }}?')">
+                                <button type="submit" class="btn-excluir">✕ Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <p>Nenhuma confirmação de presença ainda.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+function filtrarTabela(valor) {
+    const termo = valor.toLowerCase().trim();
+    document.querySelectorAll('#tabela-confirmacoes tbody tr').forEach(row => {
+        const nome = row.dataset.nome || '';
+        row.style.display = nome.includes(termo) ? '' : 'none';
+    });
+}
+
+function exportarCSV() {
+    const rows = document.querySelectorAll('#tabela-confirmacoes tbody tr');
+    if (!rows.length) { alert('Sem dados para exportar.'); return; }
+
+    let csv = 'N°,Nome,Telefone,Pessoas,Mensagem,Data\n';
+    rows.forEach((row, i) => {
+        const cols = row.querySelectorAll('td');
+        const linha = [
+            i + 1,
+            `"${cols[1]?.innerText || ''}"`,
+            `"${cols[2]?.innerText || ''}"`,
+            cols[3]?.innerText || '',
+            `"${(cols[4]?.innerText || '').replace(/"/g, "'")}"`,
+            `"${cols[5]?.innerText || ''}"`,
+        ];
+        csv += linha.join(',') + '\n';
+    });
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'confirmacoes_esther.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
