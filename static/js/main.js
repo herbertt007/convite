@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function digitosTelefone(valor) {
         let d = String(valor || '').replace(/\D/g, '');
-        // +55 91 99157-9490 → remove DDI só quando vier com código do país
+        // +55 11 90000-0000 → remove DDI só quando vier com código do país
         if (d.length >= 12 && d.startsWith('55')) d = d.slice(2);
         return d.slice(0, 11);
     }
