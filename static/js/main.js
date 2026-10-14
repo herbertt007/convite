@@ -119,13 +119,29 @@ document.addEventListener('DOMContentLoaded', () => {
         formFeedback.textContent = '';
     }
 
-    // ── MÁSCARA TELEFONE ─────────────────────────────────────
-    document.getElementById('telefone').addEventListener('input', function () {
-        let v = this.value.replace(/\D/g, '');
-        if (v.length > 11) v = v.slice(0, 11);
-        if (v.length > 6) v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-        else if (v.length > 2) v = `(${v.slice(0,2)}) ${v.slice(2)}`;
-        else if (v.length > 0) v = `(${v}`;
-        this.value = v;
+    // ── TELEFONE (sem máscara agressiva — evita travar no celular) ──
+    const campoTelefone = document.getElementById('telefone');
+
+    function digitosTelefone(valor) {
+        let d = String(valor || '').replace(/\D/g, '');
+        // +55 91 99157-9490 → remove DDI só quando vier com código do país
+        if (d.length >= 12 && d.startsWith('55')) d = d.slice(2);
+        return d.slice(0, 11);
+    }
+
+    function formatarTelefone(valor) {
+        const d = digitosTelefone(valor);
+        if (d.length <= 2) return d;
+        if (d.length <= 7) return `${d.slice(0, 2)} ${d.slice(2)}`;
+        if (d.length === 11) return `${d.slice(0, 2)} ${d.slice(2, 7)}-${d.slice(7)}`;
+        return `${d.slice(0, 2)} ${d.slice(2, 6)}-${d.slice(6)}`;
+    }
+
+    campoTelefone.addEventListener('input', function () {
+        this.value = formatarTelefone(this.value);
+    });
+
+    campoTelefone.addEventListener('blur', function () {
+        if (this.value.trim()) this.value = formatarTelefone(this.value);
     });
 });
