@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
-import pymysql
+import psycopg2
+import psycopg2.extras
 import os
 from datetime import datetime
 from functools import wraps
@@ -14,19 +15,11 @@ ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
 
 
 def get_db():
-    ssl_config = {'ssl': {}} if os.environ.get('MYSQL_SSL') else None
-    conn = pymysql.connect(
-        host=os.environ.get('MYSQL_HOST', 'localhost'),
-        user=os.environ.get('MYSQL_USER', 'root'),
-        password=os.environ.get('MYSQL_PASSWORD', ''),
-        database=os.environ.get('MYSQL_DATABASE', 'convite'),
-        port=int(os.environ.get('MYSQL_PORT', 3306)),
-        charset='utf8mb4',
-        cursorclass=pymysql.cursors.DictCursor,
-        ssl=ssl_config,
-        connect_timeout=10,
-        autocommit=False
-    )
+    database_url = os.environ.get('DATABASE_URL', '')
+    # Render usa 'postgres://' mas psycopg2 exige 'postgresql://'
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    conn = psycopg2.connect(database_url)
     return conn
 
 
@@ -35,14 +28,14 @@ def init_db():
     with conn.cursor() as c:
         c.execute('''
             CREATE TABLE IF NOT EXISTS confirmacoes (
-                id INT AUTO_INCREMENT PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 nome VARCHAR(255) NOT NULL,
                 telefone VARCHAR(50),
-                numero_pessoas INT DEFAULT 1,
+                numero_pessoas INTEGER DEFAULT 1,
                 mensagem TEXT,
-                data_confirmacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+                data_confirmacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 ip VARCHAR(50)
-            ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+            )
         ''')
     conn.commit()
     conn.close()
@@ -75,7 +68,7 @@ def confirmar():
 
     conn = get_db()
     try:
-        with conn.cursor() as c:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
             c.execute(
                 'SELECT id FROM confirmacoes WHERE nome = %s AND telefone = %s',
                 (nome, telefone)
@@ -121,7 +114,7 @@ def admin_logout():
 def admin_panel():
     conn = get_db()
     try:
-        with conn.cursor() as c:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
             c.execute('SELECT * FROM confirmacoes ORDER BY data_confirmacao DESC')
             confirmacoes = c.fetchall()
             c.execute('SELECT COUNT(*) as total FROM confirmacoes')
@@ -153,17 +146,18 @@ def excluir_confirmacao(id):
     return redirect(url_for('admin_panel'))
 
 
+
 @app.route('/admin/api/lista')
 @login_required
 def api_lista():
     conn = get_db()
     try:
-        with conn.cursor() as c:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
             c.execute('SELECT * FROM confirmacoes ORDER BY data_confirmacao DESC')
             rows = c.fetchall()
     finally:
         conn.close()
-    return jsonify(rows)
+    return jsonify([dict(r) for r in rows])
 
 
 if __name__ == '__main__':
