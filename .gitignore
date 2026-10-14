@@ -4,7 +4,14 @@ __pycache__/
 venv/
 vendor/
 
+# Banco de dados SQLite (legado)
 confirmacoes.db
 *.db
 
+# Variáveis de ambiente (NUNCA commitar)
+.env
+*.env
+
+# Arquivos de sistema
 serve-local.mjs
+.DS_Store
