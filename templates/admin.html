@@ -335,7 +335,7 @@
                         <td>{{ c.telefone or '—' }}</td>
                         <td><span class="td-badge">{{ c.numero_pessoas }}</span></td>
                         <td class="td-msg">{{ c.mensagem or '—' }}</td>
-                        <td class="td-data">{{ c.data_confirmacao[:16].replace('T', ' ') if 'T' in c.data_confirmacao else c.data_confirmacao[:16] }}</td>
+                        <td class="td-data">{{ c.data_confirmacao or '—' }}</td>
                         <td>
                             <form method="POST" action="/admin/excluir/{{ c.id }}" onsubmit="return confirm('Remover {{ c.nome }}?')">
                                 <button type="submit" class="btn-excluir">✕ Remover</button>

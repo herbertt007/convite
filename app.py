@@ -41,6 +41,18 @@ def init_db():
     conn.close()
 
 
+def format_confirmacao(row):
+    item = dict(row)
+    dt = item.get('data_confirmacao')
+    if isinstance(dt, datetime):
+        item['data_confirmacao'] = dt.strftime('%d/%m/%Y %H:%M')
+    elif dt:
+        item['data_confirmacao'] = str(dt)[:16].replace('T', ' ')
+    else:
+        item['data_confirmacao'] = '—'
+    return item
+
+
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -116,7 +128,7 @@ def admin_panel():
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
             c.execute('SELECT * FROM confirmacoes ORDER BY data_confirmacao DESC')
-            confirmacoes = c.fetchall()
+            confirmacoes = [format_confirmacao(row) for row in c.fetchall()]
             c.execute('SELECT COUNT(*) as total FROM confirmacoes')
             total_pessoas_row = c.fetchone()
             c.execute('SELECT SUM(numero_pessoas) as soma FROM confirmacoes')
@@ -124,8 +136,8 @@ def admin_panel():
     finally:
         conn.close()
 
-    total_confirmacoes = total_pessoas_row['total'] if total_pessoas_row else 0
-    total_pessoas = soma_row['soma'] if soma_row and soma_row['soma'] else 0
+    total_confirmacoes = int(total_pessoas_row['total'] or 0) if total_pessoas_row else 0
+    total_pessoas = int(soma_row['soma'] or 0) if soma_row else 0
 
     return render_template('admin.html',
                            confirmacoes=confirmacoes,
@@ -154,10 +166,10 @@ def api_lista():
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as c:
             c.execute('SELECT * FROM confirmacoes ORDER BY data_confirmacao DESC')
-            rows = c.fetchall()
+            rows = [format_confirmacao(row) for row in c.fetchall()]
     finally:
         conn.close()
-    return jsonify([dict(r) for r in rows])
+    return jsonify(rows)
 
 
 # Cria a tabela automaticamente ao iniciar (Gunicorn ou local)
