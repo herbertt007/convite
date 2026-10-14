@@ -160,6 +160,11 @@ def api_lista():
     return jsonify([dict(r) for r in rows])
 
 
-if __name__ == '__main__':
+# Cria a tabela automaticamente ao iniciar (Gunicorn ou local)
+try:
     init_db()
+except Exception as e:
+    print(f'[AVISO] init_db falhou: {e}')
+
+if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
