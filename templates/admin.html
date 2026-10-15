@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
     <title>Painel Admin — Confirmações de Presença</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Great+Vibes&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -52,6 +53,8 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
         .btn-vol {
             background: rgba(168,185,216,0.1);
@@ -186,6 +189,11 @@
             color: #d0daf0;
             vertical-align: top;
         }
+        /* Força links de telefone (auto-detectados pelo browser) a usar a cor do texto */
+        tbody td a[href^="tel"] {
+            color: #d0daf0;
+            text-decoration: none;
+        }
 
         .td-nome {
             font-weight: 700;
@@ -254,11 +262,26 @@
         .btn-export:hover { background: rgba(40,167,69,0.25); }
 
         @media (max-width: 600px) {
-            .admin-header { padding: 14px 16px; }
+            .admin-header {
+                padding: 14px 16px;
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            .header-brand { justify-content: center; }
             .header-brand-title { font-size: 22px; }
+            .header-actions {
+                justify-content: center;
+                gap: 8px;
+            }
+            .btn-vol, .btn-export, .btn-logout {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
             .admin-container { padding: 20px 14px; }
-            .search-input { width: 160px; }
-            .search-input:focus { width: 180px; }
+            .search-input { width: 100%; }
+            .search-input:focus { width: 100%; }
+            .table-header { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>

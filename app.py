@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 import psycopg2
 import psycopg2.extras
 import os
+import threading
+import time
+import urllib.request
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
@@ -65,6 +68,13 @@ def login_required(f):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+# ═══ KEEP-ALIVE / PING ═══
+@app.route('/ping')
+def ping():
+    """Health-check endpoint para manter o servidor ativo."""
+    return jsonify({'status': 'alive', 'timestamp': datetime.utcnow().isoformat()})
 
 
 @app.route('/confirmar', methods=['POST'])
@@ -172,11 +182,34 @@ def api_lista():
     return jsonify(rows)
 
 
+# ═══ SELF-PING KEEP-ALIVE (THREAD EM BACKGROUND) ═══
+def keep_alive():
+    """Envia ping para si mesmo a cada 30s para não deixar o servidor dormir."""
+    app_url = os.environ.get('RENDER_EXTERNAL_URL') or os.environ.get('APP_URL', '')
+    if not app_url:
+        print('[KEEP-ALIVE] Nenhuma URL configurada (RENDER_EXTERNAL_URL / APP_URL). Self-ping desativado.')
+        return
+    ping_url = f"{app_url.rstrip('/')}/ping"
+    print(f'[KEEP-ALIVE] Iniciado — ping a cada 30s em {ping_url}')
+    while True:
+        time.sleep(30)
+        try:
+            req = urllib.request.Request(ping_url, method='GET')
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                print(f'[KEEP-ALIVE] Ping OK — {resp.status}')
+        except Exception as e:
+            print(f'[KEEP-ALIVE] Ping falhou — {e}')
+
+
 # Cria a tabela automaticamente ao iniciar (Gunicorn ou local)
 try:
     init_db()
 except Exception as e:
     print(f'[AVISO] init_db falhou: {e}')
+
+# Inicia thread de keep-alive (daemon morre junto com o processo principal)
+keep_alive_thread = threading.Thread(target=keep_alive, daemon=True)
+keep_alive_thread.start()
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

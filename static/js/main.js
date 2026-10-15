@@ -144,4 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
     campoTelefone.addEventListener('blur', function () {
         if (this.value.trim()) this.value = formatarTelefone(this.value);
     });
+
+    // ── KEEP-ALIVE PING FANTASMA (30s) ──────────────────────
+    // Mantém o servidor Render (free tier) acordado enquanto
+    // qualquer visitante estiver com a página aberta.
+    setInterval(() => {
+        fetch('/ping', { method: 'GET' }).catch(() => {});
+    }, 30000);
 });
